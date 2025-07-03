@@ -35,7 +35,7 @@ submitBtn.addEventListener("click", async () => {
   responseBox.style.display = "block";
 
   try {
-    const res = await fetch("http://localhost:5000/analyze-car", {
+    const res = await fetch("https://get-car-info.vercel.app/analyze-car", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ base64Image })
