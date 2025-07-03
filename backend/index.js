@@ -21,7 +21,7 @@ app.post("/analyze-car", async (req, res) => {
         contents: [
           {
             parts: [
-              { text: "Identify the car brand, model, and approximate year from this image:" },
+              { text: "Identify the car brand, model, and approximate year from this image; don't identify if it's not a car just say please upload car image:" },
               {
                 inlineData: {
                   mimeType: "image/jpeg",
