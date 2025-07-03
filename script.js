@@ -1,56 +1,52 @@
-const imageInput = document.getElementById("image-upload");
-const imagePreview = document.getElementById("image-preview");
-const responseBox = document.getElementById("response-box");
-const responseText = document.getElementById("response");
-const submitBtn = document.getElementById("submit-btn");
+document.addEventListener("DOMContentLoaded", () => {
+  const imageInput = document.getElementById("image-upload");
+  const imagePreview = document.getElementById("image-preview");
+  const submitBtn = document.getElementById("submit-btn");
+  const responseBox = document.getElementById("response-box");
+  const responseText = document.getElementById("response");
 
-let base64Image = "";
+  let base64Image = "";
 
-// Preview image when uploaded
-imageInput.addEventListener("change", () => {
-  const file = imageInput.files[0];
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) return;
 
-  if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      base64Image = reader.result.split(",")[1]; // Remove data:image/...;base64,
+      imagePreview.src = reader.result;
+      imagePreview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  });
 
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    base64Image = reader.result.split(",")[1]; // remove data:image/... part
-    imagePreview.src = reader.result;
-    imagePreview.style.display = "block";
-    responseBox.style.display = "none"; // Hide response until new result
-  };
-
-  reader.readAsDataURL(file);
-});
-
-// Submit image for analysis
-submitBtn.addEventListener("click", async () => {
-  if (!base64Image) {
-    alert("Please upload an image first.");
-    return;
-  }
-
-  responseText.textContent = "🔍 Analyzing car image...";
-  responseBox.style.display = "block";
-
-  try {
-    const res = await fetch("https://get-car-info.vercel.app/analyze-car", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ base64Image })
-    });
-
-    const data = await res.json();
-
-    if (data.result) {
-      responseText.textContent = `✅ Result: ${data.result}`;
-    } else {
-      responseText.textContent = "⚠️ No result found.";
+  submitBtn.addEventListener("click", async () => {
+    if (!base64Image) {
+      alert("Please select an image first.");
+      return;
     }
 
-  } catch (err) {
-    console.error("Error:", err);
-    responseText.textContent = "❌ Error connecting to server.";
-  }
+    responseBox.style.display = "block";
+    responseText.textContent = "🔍 Analyzing car image...";
+
+    try {
+      const res = await fetch("https://get-car-info.vercel.app/analyze-car", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ base64Image })
+      });
+
+      const data = await res.json();
+      if (data && data.result) {
+        responseText.textContent = data.result;
+      } else {
+        responseText.textContent = "❌ Unable to identify the car.";
+      }
+    } catch (err) {
+      console.error(err);
+      responseText.textContent = "❌ Error occurred while analyzing.";
+    }
+  });
 });
